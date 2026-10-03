@@ -8,6 +8,16 @@
 ; ou:
 ; $ make
 
+default abs
+
+;Constantes
+section .data
+	LF equ 10  ; Line Feed
+	CR equ 13  ; Carrie return
+
+    linha db LF, CR
+	linha_len equ $-linha
+
 section .bss
     caracter resb 1     ; Reserva 1 byte na memória para o caractere
 
@@ -19,20 +29,26 @@ global _start
 _start:
 	
 	;Lê Caracter
- 	mov eax, 0x3        ; Serviço 3: sys_read
-    mov ebx, 0x0        ; Entrada padrão: teclado (stdin)
-    mov ecx, caracter   ; Endereço de memória onde o caractere será salvo
-    mov edx, 1          ; Quantidade de bytes a ler: 1 byte
-    int 0x80            ; Chama o kernel do Linux
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, caracter
+    mov rdx, 1
+    syscall
 
 	;Imprime Caracter
-	mov eax, 0x4		; Serviço 4: sys_write
-	mov ebx, 0x1		; Saída padrão: tela
-	mov ecx, caracter	; Endereço do caracter
-	mov edx, 1			; Tamanho em bytes
-	int 0x80			; Chama o kernel do Linux
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, caracter
+    mov rdx, 1
+    syscall	
 
-	;Retorna ao sistema operacional
-	mov eax, 0x1		; Serviço 1: sys_exit
-	mov ebx, 0x0		; Código de retorno 0 (sucesso)
-	int 0x80			; Chama o kernel do Linux
+    ;Pula linha
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, linha
+    mov rdx, linha_len
+    syscall
+
+	mov rax, 60
+	mov rdi, 0
+	syscall  
