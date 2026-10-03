@@ -24,6 +24,8 @@ _start:
     mov ecx, buffer		; Endereço onde o texto digitado será guardado
     mov edx, 50			; Tamanho máximo que aceitamos ler (50 bytes)
     int 0x80			; O programa pausa aqui. O usuário digita e aperta Enter.
+    ;OBS: O Enter é um caractere especial que também é lido e guardado no buffer. 
+    ;Ele é o último caractere da String digitada. Seu código ASCII é 10 (LF - Line Feed).
 
     ; EAX possui a quantidade real de bytes que o usuário digitou!
     ; Vamos guardar esse valor no EDX para usar no passo de escrita.
