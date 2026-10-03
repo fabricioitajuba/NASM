@@ -16,6 +16,9 @@ section .data
 	LF equ 10  ; Line Feed
 	CR equ 13  ; Carrie return
 
+    linha db LF, CR
+	linha_len equ $-linha
+
 	msg1 db LF, CR, "- Digite a nota 1: "
 	tam1 equ $-msg1
 
@@ -24,9 +27,6 @@ section .data
 
 	msg3 db LF, CR, "- A média é (o número é no formado 0000,0): "
 	tam3 equ $-msg3
-
-    msg4 db LF, CR
-	tam4 equ $-msg4
 
 ;Variáveis
 section .bss
@@ -115,8 +115,8 @@ _start:
     ;Pula linha
     mov rax, 1
     mov rdi, 1
-    mov rsi, msg4
-    mov rdx, tam4
+    mov rsi, linha
+    mov rdx, linha_len
     syscall
 
 	;Retorna ao sistema operacional
