@@ -15,10 +15,10 @@ section .data
 	LF equ 10  ; Line Feed
 	CR equ 13  ; Carrie return
 
-    num db '12345', LF
+    linha db LF, CR
+	linha_len equ $-linha
 
-    msg4 db LF, CR
-	tam4 equ $-msg4
+    num db '12345', LF
 
 ;Variáveis
 section .bss
@@ -47,8 +47,8 @@ _start:
     ;Pula linha
     mov rax, 1
     mov rdi, 1
-    mov rsi, msg4
-    mov rdx, tam4
+    mov rsi, linha
+    mov rdx, linha_len
     syscall
 
 	;Retorna ao sistema operacional
