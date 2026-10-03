@@ -28,8 +28,6 @@ section .data
     msg4 db LF, CR
 	tam4 equ $-msg4
 
-    ;digitos times 5 db '$'
-
 ;Variáveis
 section .bss
     nota1 resb 4    ; 3bytes + 1 0x0A
