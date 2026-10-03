@@ -2,7 +2,7 @@
 ; string2hexa - Essa rotina, converte uma STRING de números em
 ; valor hexadecimal para usar em cálculos
 ;
-; Entrada:   esi - Ponteiro da string
+; Entrada:   rsi - Ponteiro da string
 ; Saída:     ax - Valor do número
 ;****************************************************************
 
@@ -11,19 +11,20 @@ string2hexa:
             push    rcx
             push    rsi
 
-            xor     ax, ax
-            xor     cx, cx
+            xor     rax, rax
+            xor     rcx, rcx
 
 string2hexa_loop:
-            ;mov     cl, byte [esi]
-            mov     cl, [esi]
-            cmp     cl, '$'
+            ;mov     cl, byte [rsi]
+            mov     cl, [rsi]
+            ;cmp     cl, '$'
+            cmp     cl, 10
             je      string2hexa_end
             sub     cl, '0'         
-            mov     bx, 10
-            mul     bx
-            add     ax, cx   
-            inc     esi
+            mov     rbx, 10
+            mul     rbx
+            add     rax, rcx   
+            inc     rsi
             jmp     string2hexa_loop
 string2hexa_end:
 

@@ -8,18 +8,18 @@
 
 hexa2string:
 
-    push eax
-    push ecx
+    push rax
+    push rcx
 
-    push ax
+    push rax
     mov cl,4
     ror al,cl 
     call corrige_hexa
-    pop ax
+    pop rax
     call corrige_hexa
     
-    pop ecx
-    pop eax
+    pop rcx
+    pop rax
     ret
 
 corrige_hexa:
