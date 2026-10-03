@@ -9,12 +9,18 @@
 ; $ make
 ; Status: Falta implementar o arquivo hexa2string.asm
 
+default abs
+
 ;Constantes
 section .data
-    
+	LF equ 10  ; Line Feed
+	CR equ 13  ; Carrie return
+        
+    msg4 db LF, CR
+	tam4 equ $-msg4
 ;Variáveis
 section .bss
-    digitos resb 4      ; Cria 4 bytes, não inicializados
+    digitos resb 2      ; Cria 2 bytes, não inicializados
 
 ;Programa principal
 section .text
@@ -23,20 +29,27 @@ global _start
 
 _start:
 	
-    mov eax, 0ABCDH
+    mov al, 0FAH
     call hexa2string    ;Converte um número Hexadecimal para String
 
     ;Imprime String
-    mov eax, 0x4
-    mov ebx, 0x1
-    mov ecx, digitos
-    mov edx, 4
-    int 0x80
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, digitos
+    mov rdx, 2
+    syscall
+
+    ;Pula linha
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg4
+    mov rdx, tam4
+    syscall
 
 	;Retorna ao sistema operacional
-	mov eax, 0x1		; Serviço 1: sys_exit
-	mov ebx, 0x0		; Código de retorno 0 (sucesso)
-	int 0x80			; Chama o kernel do Linux
+	mov rax, 60
+	mov rdi, 0
+	syscall
 
 %include "../funções/hexa2string.asm"
 
