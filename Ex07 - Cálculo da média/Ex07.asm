@@ -7,7 +7,6 @@
 ; $ ld -s -o hello hello.o
 ; ou:
 ; $ make
-; Status: Falta implementar o arquivo hexa2string.asm
 
 default abs
 
