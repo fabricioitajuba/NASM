@@ -14,8 +14,8 @@ default abs
 section .data
 	LF equ 10  ; Line Feed
 	CR equ 13  ; Carrie return
-    
-    num db '12345', 10
+
+    num db '12345', LF
 
     msg4 db LF, CR
 	tam4 equ $-msg4
