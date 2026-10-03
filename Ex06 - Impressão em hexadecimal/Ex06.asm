@@ -16,8 +16,8 @@ section .data
 	LF equ 10  ; Line Feed
 	CR equ 13  ; Carrie return
         
-    msg4 db LF, CR
-	tam4 equ $-msg4
+    linha db LF, CR
+	linha_len equ $-linha
 ;Variáveis
 section .bss
     digitos resb 2      ; Cria 2 bytes, não inicializados
@@ -42,8 +42,8 @@ _start:
     ;Pula linha
     mov rax, 1
     mov rdi, 1
-    mov rsi, msg4
-    mov rdx, tam4
+    mov rsi, linha
+    mov rdx, linha_len
     syscall
 
 	;Retorna ao sistema operacional
