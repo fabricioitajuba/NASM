@@ -19,13 +19,13 @@ global _start
 
 _start:
 	;Imprime Caracter
-	mov eax, 0x4		; Serviço 4: sys_write
-	mov ebx, 0x1		; Saída padrão: tela
-	mov ecx, caracter	; Endereço do caracter
-	mov edx, 1			; Tamanho em bytes
-	int 0x80			; Chama o kernel do Linux
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, caracter
+    mov rdx, 1
+    syscall	
 
 	;Retorna ao sistema operacional
-	mov eax, 0x1		; Serviço 1: sys_exit
-	mov ebx, 0x0		; Código de retorno 0 (sucesso)
-	int 0x80			; Chama o kernel do Linux
+	mov rax, 60
+	mov rdi, 0
+	syscall 
