@@ -8,6 +8,16 @@
 ; ou:
 ; $ make
 
+default abs
+
+;Constantes
+section .data
+	LF equ 10  ; Line Feed
+	CR equ 13  ; Carrie return
+
+    linha db LF, CR
+	linha_len equ $-linha
+
 section .bss
 	buffer resb 50		; Reserva 50 bytes de espaço para o texto do usuário
 
@@ -19,26 +29,30 @@ global _start
 _start:
 	
     ;Leitura da String
-    mov eax, 0x3		; Serviço 3: sys_read
-    mov ebx, 0x80		; Entrada padrão: teclado (stdin)
-    mov ecx, buffer		; Endereço onde o texto digitado será guardado
-    mov edx, 50			; Tamanho máximo que aceitamos ler (50 bytes)
-    int 0x80			; O programa pausa aqui. O usuário digita e aperta Enter.
-    ;OBS: O Enter é um caractere especial que também é lido e guardado no buffer. 
-    ;Ele é o último caractere da String digitada. Seu código ASCII é 10 (LF - Line Feed).
-
-    ; EAX possui a quantidade real de bytes que o usuário digitou!
-    ; Vamos guardar esse valor no EDX para usar no passo de escrita.
-    mov edx, eax                    
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, buffer
+    mov rdx, 50
+    syscall    
+    ; OBS: O Enter é um caractere especial que também é lido e guardado no buffer. 
+    ; Ele é o último caractere da String digitada. Seu código ASCII é 10 (LF - Line Feed).
+    ; RAX possui a quantidade real de bytes que o usuário digitou!
+    mov rcx, rax
 
     ;Impressão da String
-    mov eax, 0x4		; Serviço 4: sys_write
-    mov ebx, 0x1		; Saída padrão: tela (stdout)
-    mov ecx, buffer		; Endereço do nosso texto guardado
-    ; mov edx, edx		; (Opcional) Já está com o tamanho exato retornado pelo sys_read
-    int 0x80			; Imprime o texto de volta na tela
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, buffer
+    mov rdx, rcx        ;rax possui a quantidade real de bytes que o usuário digitou!
+    syscall
 
-	;Retorna ao sistema operacional
-	mov eax, 0x1		; Serviço 1: sys_exit
-	mov ebx, 0x0		; Código de retorno 0 (sucesso)
-	int 0x80			; Chama o kernel do Linux
+    ;Pula linha
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, linha
+    mov rdx, linha_len
+    syscall
+
+	mov rax, 60
+	mov rdi, 0
+	syscall    
