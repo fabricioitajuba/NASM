@@ -28,7 +28,7 @@ section .data
     msg4 db LF, CR
 	tam4 equ $-msg4
 
-    digitos times 5 db '$'
+    ;digitos times 5 db '$'
 
 ;Variáveis
 section .bss
@@ -37,6 +37,8 @@ section .bss
 
     n1 resw 1
     n2 resw 1
+
+    digitos resb 5      ; Cria 5 bytes, não inicializados
 
 ;Programa principal
 section .text

@@ -11,7 +11,7 @@
 
 ;Constantes
 section .data
-
+    
 ;Variáveis
 section .bss
     digitos resb 4      ; Cria 4 bytes, não inicializados
