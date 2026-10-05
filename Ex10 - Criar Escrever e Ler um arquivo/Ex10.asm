@@ -2,83 +2,70 @@
 ; Autor Eng. Fabrício Ribeiro
 ;
 ; Compilar:
-; $ nasm -f elf64 hello.asm
+; $ nasm -f elf64 Ex10.asm
 ; Linkeditar
-; $ ld -s -o hello hello.o
+; $ ld -s -o Ex10 Ex10.o
 ; ou:
 ; $ make
 
-default abs
-
-;Constantes
 section .data
-    filename db "exemplo.txt", 0        ; Caminho do arquivo (precisa terminar em 0)
-    texto    db "Aprender Assembly!", 10 ; Texto com quebra de linha
-    len_text equ $ - texto               ; Tamanho do texto
+    filename db "exemplo_64bit.txt", 0
+    texto    db "Mensagem gravada e lida via Assembly!", 10
+    tam_txt  equ $ - texto
 
-;Variáveis
 section .bss
-    fd      resq 1                      ; Reserva 8 bytes (quadword) para o File Descriptor
-    buffer  resb 100                     ; Buffer para ler o texto de volta
+    buffer   resb 128          ; Reserva 128 bytes para ler o arquivo de volta
+    fd       resq 1            ; Reserva 8 bytes (quadword) para salvar o File Descriptor
 
-;Programa principal
 section .text
     global _start
 
 _start:
-    ; --- 1. ABRIR / CRIAR O ARQUIVO ---
-    mov rax, 2          ; sys_open
-    mov rdi, filename   ; nome do arquivo
-    mov rsi, 65         ; Flags: O_WRONLY (1) | O_CREAT (64) = 65 (Escrita + Criação)
-    mov rdx, 0644o      ; Permissão octal se criado: rw-r--r-- (o sufixo 'o' define octal)
+    ; 1. ABRIR / CRIAR O ARQUIVO
+    mov rax, 2                 ; syscall: sys_open
+    mov rdi, filename          ; caminho do arquivo
+    mov rsi, 0102o             ; flags: O_RDWR (2) | O_CREAT (0100o)
+    mov rdx, 0644o             ; permissões padrão (rw-r--r--)
     syscall
     
-    ; O Linux retorna o File Descriptor em RAX. Vamos salvá-lo.
-    mov [fd], rax
+    mov [fd], rax              ; salva o File Descriptor retornado em RAX
 
-    ; --- 2. ESCREVER NO ARQUIVO ---
-    mov rax, 1          ; sys_write
-    mov rdi, [fd]       ; Passa o nosso "ponteiro de arquivo" (FD)
-    mov rsi, texto      ; O que escrever
-    mov rdx, len_text   ; Quantos bytes escrever
+    ; 2. ESCREVER NO ARQUIVO
+    mov rax, 1                 ; syscall: sys_write
+    mov rdi, [fd]              ; File Descriptor do nosso arquivo
+    mov rsi, texto             ; ponteiro para a mensagem
+    mov rdx, tam_txt           ; tamanho da mensagem
     syscall
 
-    ; --- 3. REBOBINAR O CURSOR (Mover Ponteiro para o Início) ---
-    ; Como escrevemos, o cursor está no fim do arquivo. Para ler, precisamos voltar pro início.
-    ; O registrador RDX define de onde começar a contar o deslocamento (RSI):
-    ; 0 (SEEK_SET): Conta a partir do início do arquivo.
-    ; 1 (SEEK_CUR): Conta a partir da posição atual do cursor.
-    ; 2 (SEEK_END): Conta a partir do fim do arquivo.
-
-    mov rax, 8          ; sys_lseek
-    mov rdi, [fd]       ; Nosso FD
-    mov rsi, 0          ; Deslocamento: 0 bytes
-    mov rdx, 0          ; Modo: SEEK_SET (A partir do início)
+    ; 3. MOVER O PONTEIRO PARA O INÍCIO (SEEK_SET)
+    mov rax, 8                 ; syscall: sys_lseek
+    mov rdi, [fd]              ; File Descriptor
+    mov rsi, 0                 ; mover 0 bytes
+    mov rdx, 0                 ; 0 = SEEK_SET (início do arquivo)
     syscall
 
-    ; --- 4. LER DO ARQUIVO ---
-    mov rax, 0          ; sys_read
-    mov rdi, [fd]       ; Nosso FD
-    mov rsi, buffer     ; Buffer onde o texto lido vai ficar
-    mov rdx, 100        ; Quantidade máxima de bytes para ler
+    ; 4. LER O CONTEÚDO DO ARQUIVO
+    mov rax, 0                 ; syscall: sys_read
+    mov rdi, [fd]              ; File Descriptor
+    mov rsi, buffer            ; local onde o texto lido será guardado
+    mov rdx, 128               ; ler no máximo 128 bytes
     syscall
     
-    ; Guardamos a quantidade de bytes realmente lidos (que voltou em RAX) em R12 para uso futuro
-    mov r12, rax
+    mov rbx, rax               ; guarda em RBX a quantidade real de bytes lidos
 
-    ; --- 5. EXIBIR O CONTEÚDO NA TELA (stdout) ---
-    mov rax, 1          ; sys_write
-    mov rdi, 1          ; stdout (tela)
-    mov rsi, buffer     ; buffer lido do arquivo
-    mov rdx, r12        ; número de bytes que o sys_read retornou
+    ; 5. EXIBIR O CONTEÚDO LIDO NA TELA (STDOUT)
+    mov rax, 1                 ; syscall: sys_write
+    mov rdi, 1                 ; 1 = stdout (tela)
+    mov rsi, buffer            ; ponteiro para o buffer preenchido
+    mov rdx, rbx               ; quantidade de bytes lidos no passo anterior
     syscall
 
-    ; --- 6. FECHAR O ARQUIVO ---
-    mov rax, 3          ; sys_close
-    mov rdi, [fd]       ; O arquivo que queremos fechar
+    ; 6. FECHAR O ARQUIVO
+    mov rax, 3                 ; syscall: sys_close
+    mov rdi, [fd]              ; File Descriptor
     syscall
 
-    ; --- 7. SAIR DO PROGRAMA ---
-    mov rax, 60         ; sys_exit
-    xor rdi, rdi        ; status code 0
+    ; 7. FINALIZAR O PROGRAMA (EXIT)
+    mov rax, 60                ; syscall: sys_exit
+    mov rdi, 0                 ; código de retorno 0 (sem erros)
     syscall
