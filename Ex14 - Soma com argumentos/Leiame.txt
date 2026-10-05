@@ -1,0 +1,14 @@
+Para passar argumentos para um programa em Assembly no Linux, 
+nós usamos os argumentos de linha de comando (conhecidos como 
+argc e argv na linguagem C).
+
+Quando o programa inicia, o sistema operacional joga essas 
+informações direto na Pilha (Stack). O topo da pilha contém o 
+número de argumentos, e as posições seguintes contêm ponteiros 
+(endereços de memória) para os textos digitados.
+
+O desafio aqui é que tudo que você digita no terminal entra 
+como texto (ASCII). Então, se você digitar 5, o programa recebe 
+o caractere '5' (cujo valor decimal é 53). Para somar, precisamos 
+primeiro converter o texto para número, fazer a soma e depois 
+converter de volta para texto para exibir na tela.
