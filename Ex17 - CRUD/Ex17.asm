@@ -29,6 +29,9 @@ section .data
     msg_idade db LF, CR, "- Digite a idade: "
     msg_idade_len equ $-msg_idade    
 
+    date_str: db "00/00/0000"
+    time_str: db "00:00:00"
+
 ;************************************************
 ;Variáveis não inicializadas
 ;************************************************
@@ -52,7 +55,11 @@ section .bss
 
     nreg resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
 
-    digitos resb 8    
+    digitos resb 8
+
+    timespec:
+        .tv_sec:  resq 1
+        .tv_nsec: resq 1
 
 ;************************************************
 ; Programa principal
@@ -127,8 +134,6 @@ create:
     lea rdi, [REG_IDADE]
     call move_bytes
 
-
-
     ; insere ID
     mov rax, [nreg]
     inc rax
@@ -139,6 +144,26 @@ create:
     lea rsi, [digitos+5]
     lea rdi, [REG_ID]
     call move_bytes    
+
+    ; insere DATA
+    call string_data
+
+     ; move o conteúdo do buffer para o registro
+    mov rcx, 10
+    lea rsi, [date_str]
+    lea rdi, [REG_DATA]
+    call move_bytes 
+
+    ; insere HORA
+    call string_hora
+
+     ; move o conteúdo do buffer para o registro
+    mov rcx, 8
+    lea rsi, [time_str]
+    lea rdi, [REG_HORA]
+    call move_bytes     
+
+
 
     ; move o ponteiro do arquivo para o final
     mov rdi, [fd]
@@ -162,7 +187,7 @@ create:
 clear_reg:
     lea rsi, [REG_ID]
     mov rcx, reg_max-2
-    mov al, '.'
+    mov al, ' '
 clear_reg_loop:    
     mov byte [rsi], al
     inc rsi
@@ -180,3 +205,4 @@ clear_reg_loop:
 %include "../funções/block.asm"
 %include "../funções/file.asm"
 %include "../funções/hexa2decimal.asm"
+%include "../funções/time.asm"
