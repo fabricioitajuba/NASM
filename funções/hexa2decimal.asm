@@ -2,8 +2,12 @@
 ; hexa2decimal - Essa rotina, converte um número em hexadecimal
 ; de 16 bits em decimal colocando o valor em 5 posições de memória
 ;
-; Entrada:   AX - de 16 bits
-; Saída:     DIGITOS - String
+; Entradas:   AX - de 16 bits
+;
+; section .bss
+;    digitos resb 5
+;
+; Saídas:     DIGITOS - String
 ;****************************************************************
 
 hexa2decimal:   push    rax
@@ -13,26 +17,27 @@ hexa2decimal:   push    rax
                 push    rdi
 
                 ;Zera as posições de DIGITOS
-                mov     dl, '0'
-                mov     [digitos], dl
-                mov     [digitos+1], dl
-                mov     [digitos+2], dl
-                mov     [digitos+3], dl
-                mov     [digitos+4], dl
+                lea rsi, [digitos]
+                mov rcx, 8
+                mov dl, '0'
+hexa2decimal_loop1:    
+                mov byte [rsi], dl
+                inc rsi
+                loop hexa2decimal_loop1
 
-                mov     ebx, 10
-                lea     edi, [digitos]
-                add     edi, 4
+                mov     rbx, 10
+                lea     rdi, [digitos]
+                add     rdi, 7
 
-hexa2decimal_loop:
-                xor     edx, edx
-                div     ebx    
+hexa2decimal_loop2:
+                xor     rdx, rdx
+                div     rbx    
                 mov     cl, dl
                 add     cl, 30H
-                mov     [edi], cl
-                dec     edi   
-                cmp     eax, 0
-                jne     hexa2decimal_loop
+                mov     [rdi], cl
+                dec     rdi   
+                cmp     rax, 0
+                jne     hexa2decimal_loop2
 
                 pop     rdi
                 pop     rdx
