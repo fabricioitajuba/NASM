@@ -15,7 +15,7 @@
 ; Delete - nãa Concluído
 ; Lista  - não Concluído
 ; 
-; Status - Problema no menu inicial
+; Status - não concluído
 
 default abs
 
@@ -46,7 +46,7 @@ section .data
             db '>> '
     msg_ini_len equ $-msg_ini
 
-    msg_create db LF, CR, "- Criar um registro: "
+    msg_create db LF, CR, "# Criar um registro: ", LF, CR
     msg_create_len equ $-msg_create
 
     msg_read db LF, CR, "- Ler um registro: "
@@ -56,7 +56,16 @@ section .data
     msg_nome_len equ $-msg_nome
 
     msg_idade db LF, CR, "- Digite a idade: "
-    msg_idade_len equ $-msg_idade    
+    msg_idade_len equ $-msg_idade 
+
+    msg_inserir db LF, CR, "# Deseja realmente inserir o registro? (Y/N)"
+    msg_inserir_len equ $-msg_inserir   
+
+    msg_reg_inserir db LF, CR, "# Registro inserido!"
+    msg_reg_inserir_len equ $-msg_reg_inserir
+
+    msg_reg_ninserir db LF, CR, "# Registro não inserido!"
+    msg_reg_ninserir_len equ $-msg_reg_ninserir               
 
     date_str: db "00/00/0000"
     time_str: db "00:00:00"
@@ -124,7 +133,7 @@ inicio:
     call print_string  
 
     mov rsi, caracter
-    mov rdx, 1    
+    mov rdx, 2    
     call read_string
 
     mov al, [caracter]
@@ -142,9 +151,7 @@ create:
     mov rdx, msg_create_len    
     call print_string
 
-    mov rsi, caracter
-    mov rdx, 1    
-    call read_string
+    call crud_create
     jmp inicio
 
 read:
@@ -153,16 +160,14 @@ read:
     call print_string
 
     mov rsi, caracter
-    mov rdx, 1    
+    mov rdx, 2    
     call read_string
     jmp inicio
 
-    call crud_create
-
-exit:
     jmp inicio
 
     ; retorna ao sistema operacional
+exit:
     jmp exit_system
 
 
@@ -200,6 +205,23 @@ crud_create:
     mov rdx, 35    
     call read_string
 
+    ; imprime a string se deseja realmente inserir
+    mov rsi, msg_inserir
+    mov rdx, msg_inserir_len
+    call print_string
+
+    mov rsi, caracter
+    mov rdx, 2    
+    call read_string
+
+    mov al, [caracter]
+
+    cmp al, 'Y'
+    je create_insere
+    cmp al, 'N'
+    je create_ninsere
+
+create_insere:
     ; move o conteúdo do buffer para o registro
     dec rax                     ;desconsidera o último byte "0x0A"
     mov rcx, rax
@@ -236,8 +258,6 @@ crud_create:
     lea rdi, [REG_HORA]
     call move_bytes     
 
-
-
     ; move o ponteiro do arquivo para o final
     mov rdi, [fd]
     call file_pointer_end
@@ -251,6 +271,25 @@ crud_create:
     ; fecha o arquivo
     mov rdi, [fd]
     call file_close
+
+    ; imprime a string "# Registro inserido!"
+    mov rsi, msg_reg_inserir
+    mov rdx, msg_reg_inserir_len
+    call print_string
+
+    jmp create_fim
+
+create_ninsere:
+    ; imprime a string "# Registro não inserido!"
+    mov rsi, msg_reg_ninserir
+    mov rdx, msg_reg_ninserir_len
+    call print_string
+
+create_fim:
+
+    mov rsi, caracter
+    mov rdx, 2    
+    call read_string
 
     ret
 
