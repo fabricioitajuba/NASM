@@ -23,15 +23,13 @@ default abs
 ;Variáveis inicializadas
 ;************************************************
 section .data
+
     LF equ 10
     CR equ 13
 
-    reg_max equ 64
+    reg_max equ 63
 
     filename db "registro.txt", 0
-
-    clear_screen db 0x1b, '[2J', 0x1b, '[H'
-    clear_len    equ $ - clear_screen
 
     msg_ini db '---------------------------------',CR,LF
             db '### CRUD versao 1.0, 07/10/2026',CR,LF
@@ -67,8 +65,6 @@ section .data
     msg_reg_ninserir db LF, CR, "# Registro não inserido!"
     msg_reg_ninserir_len equ $-msg_reg_ninserir               
 
-    date_str: db "00/00/0000"
-    time_str: db "00:00:00"
 
 ;************************************************
 ;Variáveis não inicializadas
@@ -92,12 +88,6 @@ section .bss
     buffer_teclado resb 35
 
     nreg resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
-
-    digitos resb 8
-
-    timespec:
-        .tv_sec:  resq 1
-        .tv_nsec: resq 1
 
     caracter resb 2
 
@@ -123,6 +113,7 @@ _start:
     xor rdx, rdx
     mov rbx, 64
     div rbx
+    inc rax
     mov [nreg], rax
 
 inicio:
@@ -130,10 +121,10 @@ inicio:
 
     mov rsi, msg_ini
     mov rdx, msg_ini_len
-    call print_string  
+    call print_string
 
     mov rsi, caracter
-    mov rdx, 2    
+    mov rdx, 2
     call read_string
 
     mov al, [caracter]
@@ -148,7 +139,7 @@ inicio:
 
 create:
     mov rsi, msg_create
-    mov rdx, msg_create_len    
+    mov rdx, msg_create_len
     call print_string
 
     call crud_create
@@ -166,8 +157,12 @@ read:
 
     jmp inicio
 
-    ; retorna ao sistema operacional
+    ; fecha o arquivo e retorna ao sistema operacional
 exit:
+
+    mov rdi, [fd]
+    call file_close
+
     jmp exit_system
 
 
@@ -205,23 +200,6 @@ crud_create:
     mov rdx, 35    
     call read_string
 
-    ; imprime a string se deseja realmente inserir
-    mov rsi, msg_inserir
-    mov rdx, msg_inserir_len
-    call print_string
-
-    mov rsi, caracter
-    mov rdx, 2    
-    call read_string
-
-    mov al, [caracter]
-
-    cmp al, 'Y'
-    je create_insere
-    cmp al, 'N'
-    je create_ninsere
-
-create_insere:
     ; move o conteúdo do buffer para o registro
     dec rax                     ;desconsidera o último byte "0x0A"
     mov rcx, rax
@@ -231,8 +209,10 @@ create_insere:
 
     ; insere ID
     mov rax, [nreg]
-    inc rax
     call hexa2decimal
+    mov rax, [nreg]
+    inc rax
+    mov [nreg], rax
 
      ; move o conteúdo do buffer para o registro
     mov rcx, 3
@@ -258,6 +238,27 @@ create_insere:
     lea rdi, [REG_HORA]
     call move_bytes     
 
+crud_create_loop1:
+
+    ; imprime a string se deseja realmente inserir
+    mov rsi, msg_inserir
+    mov rdx, msg_inserir_len
+    call print_string
+
+    mov rsi, caracter
+    mov rdx, 2    
+    call read_string
+
+    mov al, [caracter]
+
+    cmp al, 'Y'
+    je create_insere
+    cmp al, 'N'
+    je create_ninsere
+    jmp crud_create_loop1
+
+create_insere:
+
     ; move o ponteiro do arquivo para o final
     mov rdi, [fd]
     call file_pointer_end
@@ -267,10 +268,6 @@ create_insere:
     mov rsi, REG_ID
     mov rdx, reg_max
     call file_write
-
-    ; fecha o arquivo
-    mov rdi, [fd]
-    call file_close
 
     ; imprime a string "# Registro inserido!"
     mov rsi, msg_reg_inserir
