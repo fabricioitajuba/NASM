@@ -16,6 +16,19 @@
 ;        .tv_nsec: resq 1    ; Nanossegundos (64-bit)
 ;**************************************************************
 
+section .data
+
+    date_str: db "00/00/0000"
+    time_str: db "00:00:00"
+
+section .bss
+
+    timespec:
+        .tv_sec:  resq 1
+        .tv_nsec: resq 1
+
+section .text
+
 string_data:
 
     mov rax, 228

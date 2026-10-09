@@ -1,3 +1,10 @@
+section .data
+
+    clear_screen db 0x1b, '[2J', 0x1b, '[H'
+    clear_len    equ $ - clear_screen
+
+section .text
+
 ;**************************************************************
 ; string_data - Data do sistema (Ex13.asm)
 ;

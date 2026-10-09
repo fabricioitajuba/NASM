@@ -1,3 +1,8 @@
+section .bss
+    digitos resb 8
+
+section .text
+
 ;****************************************************************
 ; hexa2decimal - Essa rotina, converte um número em hexadecimal
 ; de 16 bits em decimal colocando o valor em 5 posições de memória
