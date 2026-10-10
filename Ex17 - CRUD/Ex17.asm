@@ -27,7 +27,7 @@ section .data
     LF equ 10
     CR equ 13
 
-    reg_max equ 63
+    reg_max equ 64
 
     filename db "registro.txt", 0
 
@@ -47,24 +47,20 @@ section .data
     msg_create db LF, CR, "# Criar um registro: ", LF, CR
     msg_create_len equ $-msg_create
 
-    msg_read db LF, CR, "- Ler um registro: "
+    msg_read db LF, CR, "# Ler um registro: ", LF, CR
     msg_read_len equ $-msg_read
 
     msg_nome db LF, CR, "- Digite o nome: "
     msg_nome_len equ $-msg_nome
 
     msg_idade db LF, CR, "- Digite a idade: "
-    msg_idade_len equ $-msg_idade 
+    msg_idade_len equ $-msg_idade  
 
-    msg_inserir db LF, CR, "# Deseja realmente inserir o registro? (Y/N)"
-    msg_inserir_len equ $-msg_inserir   
+    nome db LF, CR, "- Nome: "
+    nome_len equ $-nome
 
-    msg_reg_inserir db LF, CR, "# Registro inserido!"
-    msg_reg_inserir_len equ $-msg_reg_inserir
-
-    msg_reg_ninserir db LF, CR, "# Registro não inserido!"
-    msg_reg_ninserir_len equ $-msg_reg_ninserir               
-
+    idade db LF, CR, "- Idade: "
+    idade_len equ $-idade             
 
 ;************************************************
 ;Variáveis não inicializadas
@@ -82,10 +78,11 @@ section .bss
     REG_NOME    resb 34
                 resb 1
     REG_IDADE   resb 3
-                resb CR
-                resb LF
+    REG_LF      resb 1
+    REG_CR      resb 1
 
     buffer_teclado resb 35
+    buffer_read resb reg_max-1
 
     nreg resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
 
@@ -113,7 +110,6 @@ _start:
     xor rdx, rdx
     mov rbx, 64
     div rbx
-    inc rax
     mov [nreg], rax
 
 inicio:
@@ -150,9 +146,7 @@ read:
     mov rdx, msg_read_len    
     call print_string
 
-    mov rsi, caracter
-    mov rdx, 2    
-    call read_string
+    call crud_read
     jmp inicio
 
     jmp inicio
@@ -165,154 +159,13 @@ exit:
 
     jmp exit_system
 
-
-;******************************************************
-; Cria registro
-;******************************************************
-crud_create:
-
-    call clear_reg
-
-    ; imprime a string do nome
-    mov rsi, msg_nome
-    mov rdx, msg_nome_len
-    call print_string
-
-    ; leitura do nome
-    mov rsi, buffer_teclado
-    mov rdx, 35    
-    call read_string
-
-    ; move o conteúdo do buffer para o registro
-    dec rax                     ;desconsidera o último byte "0x0A"
-    mov rcx, rax
-    lea rsi, [buffer_teclado]
-    lea rdi, [REG_NOME]
-    call move_bytes
-
-    ; imprime a string da idade
-    mov rsi, msg_idade
-    mov rdx, msg_idade_len
-    call print_string
-
-    ; leitura da idade
-    mov rsi, buffer_teclado
-    mov rdx, 35    
-    call read_string
-
-    ; move o conteúdo do buffer para o registro
-    dec rax                     ;desconsidera o último byte "0x0A"
-    mov rcx, rax
-    lea rsi, [buffer_teclado]
-    lea rdi, [REG_IDADE]
-    call move_bytes
-
-    ; insere ID
-    mov rax, [nreg]
-    call hexa2decimal
-    mov rax, [nreg]
-    inc rax
-    mov [nreg], rax
-
-     ; move o conteúdo do buffer para o registro
-    mov rcx, 3
-    lea rsi, [digitos+5]
-    lea rdi, [REG_ID]
-    call move_bytes    
-
-    ; insere DATA
-    call string_data
-
-     ; move o conteúdo do buffer para o registro
-    mov rcx, 10
-    lea rsi, [date_str]
-    lea rdi, [REG_DATA]
-    call move_bytes 
-
-    ; insere HORA
-    call string_hora
-
-     ; move o conteúdo do buffer para o registro
-    mov rcx, 8
-    lea rsi, [time_str]
-    lea rdi, [REG_HORA]
-    call move_bytes     
-
-crud_create_loop1:
-
-    ; imprime a string se deseja realmente inserir
-    mov rsi, msg_inserir
-    mov rdx, msg_inserir_len
-    call print_string
-
-    mov rsi, caracter
-    mov rdx, 2    
-    call read_string
-
-    mov al, [caracter]
-
-    cmp al, 'Y'
-    je create_insere
-    cmp al, 'N'
-    je create_ninsere
-    jmp crud_create_loop1
-
-create_insere:
-
-    ; move o ponteiro do arquivo para o final
-    mov rdi, [fd]
-    call file_pointer_end
-
-    ; escreve no arquivo
-    mov rdi, [fd]
-    mov rsi, REG_ID
-    mov rdx, reg_max
-    call file_write
-
-    ; imprime a string "# Registro inserido!"
-    mov rsi, msg_reg_inserir
-    mov rdx, msg_reg_inserir_len
-    call print_string
-
-    jmp create_fim
-
-create_ninsere:
-    ; imprime a string "# Registro não inserido!"
-    mov rsi, msg_reg_ninserir
-    mov rdx, msg_reg_ninserir_len
-    call print_string
-
-create_fim:
-
-    mov rsi, caracter
-    mov rdx, 2    
-    call read_string
-
-    ret
-
-;******************************************************
-; Limpa o buffer de registro
-;******************************************************
-clear_reg:
-    lea rsi, [REG_ID]
-    mov rcx, reg_max-2
-    mov al, ' '
-clear_reg_loop:    
-    mov byte [rsi], al
-    inc rsi
-    loop clear_reg_loop
-    inc rsi
-    mov al, LF
-    mov byte [rsi], al
-    inc rsi
-    mov al, CR
-    mov byte [rsi], al
-    ret
-
+%include "./crud-create.asm"
+%include "./crud-read.asm"
 
 %include "../funções/string.asm"
 %include "../funções/block.asm"
 %include "../funções/file.asm"
+%include "../funções/string2hexa.asm"
 %include "../funções/hexa2decimal.asm"
 %include "../funções/time.asm"
 %include "../funções/system.asm"
