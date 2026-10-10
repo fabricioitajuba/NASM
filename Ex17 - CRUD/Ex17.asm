@@ -10,7 +10,7 @@
 ;
 ; Etapas: 
 ; Create - Concluído
-; Read   - não Concluído
+; Read   - Concluído
 ; Update - não Concluído
 ; Delete - nãa Concluído
 ; Lista  - não Concluído
