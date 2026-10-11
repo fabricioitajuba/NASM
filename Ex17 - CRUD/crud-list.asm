@@ -115,6 +115,12 @@ list_loop1:
     jmp list_loop2
 
 list_end:
+
+    ; Imprime a mensagem "Pressione qualquer tecla para continuar..."
+    mov rsi, msg_list_reg2
+    mov rdx, msg_list_reg2_len
+    call print_string
+    
     mov rsi, caracter
     mov rdx, 2    
     call read_string
