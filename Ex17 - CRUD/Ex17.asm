@@ -11,7 +11,7 @@
 ; Etapas: 
 ; Create - Concluído
 ; Read   - Concluído
-; Update - não Concluído
+; Update - Concluído
 ; Delete - nãa Concluído
 ; Lista  - não Concluído
 ; 
@@ -50,6 +50,9 @@ section .data
     msg_read db LF, CR, "# Ler um registro: ", LF, CR
     msg_read_len equ $-msg_read
 
+    msg_update db LF, CR, "# Atualizar um registro: ", LF, CR
+    msg_update_len equ $-msg_update
+
     msg_nome db LF, CR, "- Digite o nome: "
     msg_nome_len equ $-msg_nome
 
@@ -85,8 +88,11 @@ section .bss
     buffer_read resb reg_max-1
 
     nreg resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
+    nreg2 resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
 
     caracter resb 2
+
+    offset resq 1    
 
 ;************************************************
 ; Programa principal
@@ -110,6 +116,7 @@ _start:
     xor rdx, rdx
     mov rbx, 64
     div rbx
+    inc rax
     mov [nreg], rax
 
 inicio:
@@ -129,6 +136,8 @@ inicio:
     je create
     cmp al, 'R'
     je read
+    cmp al, 'U'
+    je update    
     cmp al, 'Q'
     je exit    
     jmp inicio
@@ -149,6 +158,12 @@ read:
     call crud_read
     jmp inicio
 
+update:
+    mov rsi, msg_update
+    mov rdx, msg_update_len
+    call print_string
+
+    call crud_update
     jmp inicio
 
     ; fecha o arquivo e retorna ao sistema operacional
@@ -159,8 +174,40 @@ exit:
 
     jmp exit_system
 
+;******************************************************
+; Limpa o buffer de registro
+;******************************************************
+clear_reg:
+    lea rsi, [REG_ID]
+    mov rcx, reg_max
+    mov al, ' '
+clear_reg_loop:    
+    mov byte [rsi], al
+    inc rsi
+    loop clear_reg_loop
+    mov al, LF
+    mov [REG_LF], al
+    mov al, CR
+    mov [REG_CR], al
+    ret
+
+;******************************************************
+; Limpa o buffer de leitura
+;******************************************************
+clear_buffer_read:
+    lea rsi, [buffer_read]
+    mov rcx, reg_max-1
+    mov al, ' '
+clear_buffer_read_loop:    
+    mov byte [rsi], al
+    inc rsi
+    loop clear_buffer_read_loop
+
+    ret
+
 %include "./crud-create.asm"
 %include "./crud-read.asm"
+%include "./crud-update.asm"
 
 %include "../funções/string.asm"
 %include "../funções/block.asm"

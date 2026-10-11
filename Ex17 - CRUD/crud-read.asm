@@ -8,7 +8,6 @@ section .data
     msg_read_reg_len equ $-msg_read_reg
 
 section .bss
-    offset resq 1
 
 section .text
 
@@ -52,9 +51,9 @@ crud_read:
     call file_read
 
     ; Imprime o registro lido <---------------teste
-    mov rsi, buffer_read
-    mov rdx, reg_max-1
-    call print_string
+    ;mov rsi, buffer_read
+    ;mov rdx, reg_max-1
+    ;call print_string
 
     ; Imprime o nome
     mov rsi, nome
@@ -78,19 +77,5 @@ crud_read_end:
     mov rsi, caracter
     mov rdx, 2    
     call read_string
-
-    ret
-
-;******************************************************
-; Limpa o buffer de leitura
-;******************************************************
-clear_buffer_read:
-    lea rsi, [buffer_read]
-    mov rcx, reg_max-1
-    mov al, ' '
-clear_buffer_read_loop:    
-    mov byte [rsi], al
-    inc rsi
-    loop clear_buffer_read_loop
 
     ret

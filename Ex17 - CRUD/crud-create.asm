@@ -140,20 +140,3 @@ create_fim:
     call read_string
 
     ret
-
-;******************************************************
-; Limpa o buffer de registro
-;******************************************************
-clear_reg:
-    lea rsi, [REG_ID]
-    mov rcx, reg_max
-    mov al, ' '
-clear_reg_loop:    
-    mov byte [rsi], al
-    inc rsi
-    loop clear_reg_loop
-    mov al, LF
-    mov [REG_LF], al
-    mov al, CR
-    mov [REG_CR], al
-    ret

@@ -162,7 +162,7 @@ string_hora:
     xor rdx, rdx
     mov rbx, 60
     div rbx
-    sub rax, 3
+    ;sub rax, 3
     mov r9, rdx
     mov r10, rax
 
