@@ -13,9 +13,9 @@
 ; Read   - Concluído
 ; Update - Concluído
 ; Delete - Concluído
-; Lista  - não Concluído
+; Lista  - Concluído
 ; 
-; Status - não concluído
+; Status - Concluído
 
 default abs
 
