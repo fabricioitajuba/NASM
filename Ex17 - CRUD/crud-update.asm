@@ -28,12 +28,12 @@ crud_update:
 
     call clear_buffer_read
 
-    ; imprime a string de qual registro deseja ler
+    ; imprime a string de qual registro deseja atualizar
     mov rsi, msg_update_reg
     mov rdx, msg_update_reg_len
     call print_string
 
-    ; Lê qual registro deseja ler
+    ; Lê qual registro deseja atualizar
     mov rsi, buffer_teclado
     mov rdx, 4
     call read_string
@@ -42,13 +42,13 @@ crud_update:
     mov rsi, buffer_teclado
     call string2hexa
 
-    ;Guarda o número do registro a ser lido
+    ;Guarda o número do registro a ser atualizado
     mov [nreg2], rax
 
-    ; Calcula o registro a ser lido
+    ; Calcula o registro a ser atualizado
     dec rax
     mov rbx, reg_max-1
-    mul rbx      ;rax contém o ponteiro do registro a ser lido
+    mul rbx      ;rax contém o ponteiro do registro a ser atualizado
     mov [offset], rax
 
     ; move o ponteiro para o início do registro
@@ -93,7 +93,6 @@ crud_update:
     mov rsi, msg_update_reg_new
     mov rdx, msg_update_reg_new_len
     call print_string
-;-----------------------------------------------------------------------
 
     call clear_reg
 
@@ -209,11 +208,9 @@ update_ninsere:
     mov rdx, msg_reg_msg_update3_len
     call print_string
 
-;-----------------------------------------------------------------------
 crud_update_end:
     mov rsi, caracter
     mov rdx, 2    
     call read_string
 
     ret
-

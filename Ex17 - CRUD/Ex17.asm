@@ -12,7 +12,7 @@
 ; Create - Concluído
 ; Read   - Concluído
 ; Update - Concluído
-; Delete - nãa Concluído
+; Delete - Concluído
 ; Lista  - não Concluído
 ; 
 ; Status - não concluído
@@ -52,6 +52,9 @@ section .data
 
     msg_update db LF, CR, "# Atualizar um registro: ", LF, CR
     msg_update_len equ $-msg_update
+
+    msg_delete db LF, CR, "# Deletar um registro: ", LF, CR
+    msg_delete_len equ $-msg_delete
 
     msg_nome db LF, CR, "- Digite o nome: "
     msg_nome_len equ $-msg_nome
@@ -138,6 +141,8 @@ inicio:
     je read
     cmp al, 'U'
     je update    
+    cmp al, 'D'
+    je delete
     cmp al, 'Q'
     je exit    
     jmp inicio
@@ -164,6 +169,14 @@ update:
     call print_string
 
     call crud_update
+    jmp inicio
+
+delete:
+    mov rsi, msg_delete
+    mov rdx, msg_delete_len
+    call print_string
+
+    call crud_delete
     jmp inicio
 
     ; fecha o arquivo e retorna ao sistema operacional
@@ -208,6 +221,7 @@ clear_buffer_read_loop:
 %include "./crud-create.asm"
 %include "./crud-read.asm"
 %include "./crud-update.asm"
+%include "./crud-delete.asm"
 
 %include "../funções/string.asm"
 %include "../funções/block.asm"
