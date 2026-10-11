@@ -148,6 +148,8 @@ string_hora:
     xor rdi, rdi
     syscall
 
+    sub rax, 10800      ; RAX agora contém o timestamp ajustado para Brasília
+
     xor rdx, rdx
     mov rbx, 86400
     div rbx
@@ -162,7 +164,7 @@ string_hora:
     xor rdx, rdx
     mov rbx, 60
     div rbx
-    ;sub rax, 3
+    
     mov r9, rdx
     mov r10, rax
 
