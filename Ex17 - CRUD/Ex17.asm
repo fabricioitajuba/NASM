@@ -56,6 +56,9 @@ section .data
     msg_delete db LF, CR, "# Deletar um registro: ", LF, CR
     msg_delete_len equ $-msg_delete
 
+    msg_list db LF, CR, "# Listar todos os registros: ", LF, CR
+    msg_list_len equ $-msg_list
+
     msg_nome db LF, CR, "- Digite o nome: "
     msg_nome_len equ $-msg_nome
 
@@ -95,7 +98,8 @@ section .bss
 
     caracter resb 2
 
-    offset resq 1    
+    offset resq 1
+    cont resq 1    
 
 ;************************************************
 ; Programa principal
@@ -143,6 +147,8 @@ inicio:
     je update    
     cmp al, 'D'
     je delete
+    cmp al, 'L'
+    je list    
     cmp al, 'Q'
     je exit    
     jmp inicio
@@ -177,6 +183,14 @@ delete:
     call print_string
 
     call crud_delete
+    jmp inicio
+
+list:
+    mov rsi, msg_list
+    mov rdx, msg_list_len
+    call print_string
+
+    call crud_list
     jmp inicio
 
     ; fecha o arquivo e retorna ao sistema operacional
@@ -222,6 +236,7 @@ clear_buffer_read_loop:
 %include "./crud-read.asm"
 %include "./crud-update.asm"
 %include "./crud-delete.asm"
+%include "./crud-list.asm"
 
 %include "../funções/string.asm"
 %include "../funções/block.asm"

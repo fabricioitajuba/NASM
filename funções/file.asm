@@ -131,10 +131,15 @@ file_write:
 ; rdi - file descriptor
 ; rsi - ponteiro do buffer
 ; rdx - quantidade e bytes 
+;
+; Saídas:
+; rax - quantidade de bytes lidos
+;       rax > 0 - quantidade de bytes lidos com sucesso
+;       rax = 0 - fim do arquivo  
+;       rax < 0 - erro na leitura
 ;**************************************************************
 file_read:
 
-    push rax
     push rdx
     push rsi
     push rdi
@@ -145,7 +150,6 @@ file_read:
     pop rdi
     pop rsi
     pop rdx
-    pop rax
 
     ret
     
