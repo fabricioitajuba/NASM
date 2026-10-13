@@ -24,7 +24,7 @@ section .text
 crud_delete:
 
     call clear_buffer_read
-
+    
     ; imprime a string de qual registro deseja deletar
     mov rsi, msg_delete_reg
     mov rdx, msg_delete_reg_len
@@ -108,6 +108,10 @@ crud_delete_loop1:
 crud_delete_insere:
 
     call clear_reg
+   
+    lea rsi, [REG_ID]
+    mov al, '*'
+    mov byte [rsi+3], al
 
     ; move o ponteiro para o início do registro
     mov rdi, [fd]
@@ -121,7 +125,7 @@ crud_delete_insere:
     ; escreve no arquivo
     mov rdi, [fd]
     mov rsi, REG_ID
-    mov rdx, reg_max-3
+    mov rdx, reg_max-2
     call file_write
 
     ; imprime a string "# Registro deletado!"

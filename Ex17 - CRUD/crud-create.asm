@@ -53,22 +53,10 @@ crud_create:
     lea rdi, [REG_IDADE]
     call move_bytes
 
-    ; insere ID
-    mov rax, [nreg]
-    inc rax
-    mov [nreg], rax
-    call hexa2decimal
-
-     ; move o conteúdo do buffer para o registro
-    mov rcx, 3
-    lea rsi, [digitos+5]
-    lea rdi, [REG_ID]
-    call move_bytes    
-
     ; insere DATA
     call string_data
 
-     ; move o conteúdo do buffer para o registro
+    ; move o conteúdo do buffer para o registro
     mov rcx, 10
     lea rsi, [date_str]
     lea rdi, [REG_DATA]
@@ -77,7 +65,7 @@ crud_create:
     ; insere HORA
     call string_hora
 
-     ; move o conteúdo do buffer para o registro
+    ; move o conteúdo do buffer para o registro
     mov rcx, 8
     lea rsi, [time_str]
     lea rdi, [REG_HORA]
@@ -104,15 +92,71 @@ crud_create_loop1:
 
 create_insere:
 
-    ; move o ponteiro do arquivo para o final
+    mov rax, 0
+    mov [offset], rax
+
+tst_insere:
+
+    ; move o ponteiro para o início do arquivo
     mov rdi, [fd]
-    call file_pointer_end
+    call file_pointer_begin
+
+    ; Posiciona o ponteiro para um local específico do arquivo
+    mov rdi, [fd]
+    mov rsi, [offset]
+    call file_pointer_set
+
+    ; Le o registro no local específico do arquivo
+    mov rdi, [fd]
+    mov rsi, buffer_read
+    mov rdx, reg_max-1
+    call file_read
+
+    cmp byte [buffer_read+3], '*'
+    je create_inserer
+
+    cmp rax, 0
+    je create_inserer2
+
+    mov rax, [offset]
+    add rax, reg_max-1
+    mov [offset], rax
+    jmp tst_insere
+
+create_inserer:
+
+    ; move o ponteiro para o início do arquivo
+    mov rdi, [fd]
+    call file_pointer_begin
+    
+    ; Posiciona o ponteiro para um local específico do arquivo
+    mov rdi, [fd]
+    mov rsi, [offset]
+    call file_pointer_set
+
+create_inserer2:
+
+    ; calcula o ID
+    mov rax, [offset]
+    xor rdx, rdx
+    mov rbx, 63
+    div rbx
+    inc rax
+    call hexa2decimal
+
+    ; insere ID
+    mov rcx, 3
+    lea rsi, [digitos+5]
+    lea rdi, [REG_ID]
+    call move_bytes 
 
     ; escreve no arquivo
     mov rdi, [fd]
     mov rsi, REG_ID
     mov rdx, reg_max-1
     call file_write
+
+msg_inserido:
 
     ; imprime a string "# Registro inserido!"
     mov rsi, msg_reg_inserir

@@ -31,10 +31,15 @@ section .data
 
     filename db "registro.txt", 0
 
-    msg_ini db '---------------------------------',CR,LF
+    msg_ini1 db '---------------------------------',CR,LF
             db '### CRUD versao 1.0, 07/10/2026',CR,LF
             db '---------------------------------',CR,LF
-            db CR,LF,'- O que Voce deseja?',CR,LF,CR,LF
+    msg_ini1_len equ $-msg_ini1
+
+    n_reg db "# Registros salvos: "
+    n_reg_len equ $-n_reg
+
+    msg_ini2 db CR,LF,CR,LF,'- O que Voce deseja?',CR,LF,CR,LF
             db 'C - Criar um registro;',CR,LF
             db 'R - Ler um registro;',CR,LF
             db 'U - Atualizar um registro;',CR,LF
@@ -42,7 +47,7 @@ section .data
             db 'L - Listar todos os registros;',CR,LF
             db 'Q - Sair;',CR,LF
             db '>> '
-    msg_ini_len equ $-msg_ini
+    msg_ini2_len equ $-msg_ini2
 
     msg_create db LF, CR, "# Criar um registro: ", LF, CR
     msg_create_len equ $-msg_create
@@ -91,7 +96,7 @@ section .bss
     REG_CR      resb 1
 
     buffer_teclado resb 35
-    buffer_read resb reg_max-1
+    buffer_read resb reg_max
 
     nreg resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
     nreg2 resq 1         ; Reserva 1 bloco de 64 bits (Quadword) na memória
@@ -114,23 +119,30 @@ _start:
     call file_open_read_write_create
     mov [fd], rax
 
-    ; calcula o número de bytes do arquivo
-    mov rdi, [fd]
-    call file_pointer_end
-    ;rax possui o tamanho exato de bytes
-
-    ;calcula o número de registros salvos
-    xor rdx, rdx
-    mov rbx, 64
-    div rbx
-    inc rax
-    mov [nreg], rax
-
 inicio:
     call clear_screean
 
-    mov rsi, msg_ini
-    mov rdx, msg_ini_len
+    mov rsi, msg_ini1
+    mov rdx, msg_ini1_len
+    call print_string
+
+    mov rsi, n_reg
+    mov rdx, n_reg_len
+    call print_string
+
+    ;calcula o número de registros salvos
+    mov rdi, [fd]
+    call file_pointer_end
+    xor rdx, rdx
+    mov rbx, 63
+    div rbx
+    call hexa2decimal
+    mov rsi, digitos+5
+    mov rdx, 3
+    call print_string
+
+    mov rsi, msg_ini2
+    mov rdx, msg_ini2_len
     call print_string
 
     mov rsi, caracter
@@ -223,7 +235,7 @@ clear_reg_loop:
 ;******************************************************
 clear_buffer_read:
     lea rsi, [buffer_read]
-    mov rcx, reg_max-1
+    mov rcx, reg_max
     mov al, ' '
 clear_buffer_read_loop:    
     mov byte [rsi], al

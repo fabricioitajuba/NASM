@@ -134,7 +134,7 @@ crud_update:
     mov rax, [nreg2]
     call hexa2decimal
 
-     ; move o conteúdo do buffer para o registro
+    ; move o conteúdo do buffer para o registro
     mov rcx, 3
     lea rsi, [digitos+5]
     lea rdi, [REG_ID]
@@ -143,7 +143,7 @@ crud_update:
     ; insere DATA
     call string_data
 
-     ; move o conteúdo do buffer para o registro
+    ; move o conteúdo do buffer para o registro
     mov rcx, 10
     lea rsi, [date_str]
     lea rdi, [REG_DATA]
@@ -152,7 +152,7 @@ crud_update:
     ; insere HORA
     call string_hora
 
-     ; move o conteúdo do buffer para o registro
+    ; move o conteúdo do buffer para o registro
     mov rcx, 8
     lea rsi, [time_str]
     lea rdi, [REG_HORA]
